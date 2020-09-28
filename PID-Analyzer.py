@@ -6,7 +6,7 @@ import time
 import matplotlib.pyplot as plt
 from six.moves import input as sinput
 
-from pidanalyze import __version__, loader
+from pidanalyze import __version__, loader, plotter, analyzer
 
 # ----------------------------------------------------------------------------------
 # "THE BEER-WARE LICENSE" (Revision 42):
@@ -16,9 +16,36 @@ from pidanalyze import __version__, loader
 # ----------------------------------------------------------------------------------
 
 
-
 def run_analysis(log_file_path, plot_name, blackbox_decode, show, noise_bounds):
-    loader.BB_log(log_file_path, plot_name, blackbox_decode, show, noise_bounds)
+    bb_log = loader.BB_log(log_file_path, plot_name, blackbox_decode)
+
+    loglist = bb_log.decode(log_file_path)
+    heads = bb_log.beheader(loglist)
+
+    figs = []
+    for head in heads:
+        fpath = head["tempFile"][:-3] + "01.csv"
+        log = plotter.CSV_log(fpath, plot_name, head, noise_bounds)
+
+        logging.info("Processing:")
+        data = log.readcsv(fpath)
+        traces = log.find_traces(data)
+
+        analyzed = []
+        for trace in traces:
+            logging.info(trace["name"] + "...   ")
+            analyzed.append(analyzer.Trace(trace))
+        roll, pitch, yaw = analyzed
+
+        fig_resp = log.plot_all_resp([roll, pitch, yaw], analyzer.Trace.threshold)
+        fig_noise = log.plot_all_noise([roll, pitch, yaw], noise_bounds)
+
+        figs.append([fig_resp, fig_noise])
+        if show != "Y":
+            plt.cla()
+            plt.clf()
+
+    bb_log.deletejunk(loglist)
     logging.info("Analysis complete, showing plot. (Close plot to exit.)")
 
 

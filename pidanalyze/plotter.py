@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 import matplotlib.colors as colors
 
-from . import __version__, analyzer
+from . import __version__
 
 
 class CSV_log:
@@ -14,16 +14,6 @@ class CSV_log:
         self.file = fpath
         self.name = name
         self.headdict = headdict
-
-        self.data = self.readcsv(self.file)
-
-        logging.info("Processing:")
-        self.traces = self.find_traces(self.data)
-        self.roll, self.pitch, self.yaw = self.__analyze()
-        self.fig_resp = self.plot_all_resp([self.roll, self.pitch, self.yaw])
-        self.fig_noise = self.plot_all_noise(
-            [self.roll, self.pitch, self.yaw], noise_bounds
-        )
 
     def check_lims_list(self, lims):
         if type(lims) is list:
@@ -340,7 +330,8 @@ class CSV_log:
         meanfreq = 1.0 / (traces[0].time[1] - traces[0].time[0])
         ax4 = plt.subplot(gs1[12, -1])
         t = (
-            "PID-Analyzer " + __version__
+            "PID-Analyzer "
+            + __version__
             + "| Betaflight: Version "
             + self.headdict["version"]
             + " | Craftname: "
@@ -433,9 +424,7 @@ class CSV_log:
         )
         return fig
 
-    def plot_all_resp(
-        self, traces, style="ra"
-    ):  # style='raw' for response vs. time in color plot
+    def plot_all_resp(self, traces, threshold, style="ra"):
         textsize = 7
         titelsize = 10
         rcParams.update({"font.size": 9})
@@ -538,7 +527,7 @@ class CSV_log:
                 label=tr.name
                 + " step response "
                 + "(<"
-                + str(int(analyzer.Trace.threshold))
+                + str(int(threshold))
                 + ") "
                 + " PID "
                 + self.headdict[tr.name + "PID"],
@@ -562,7 +551,7 @@ class CSV_log:
                     label=tr.name
                     + " step response "
                     + "(>"
-                    + str(int(analyzer.Trace.threshold))
+                    + str(int(threshold))
                     + ") "
                     + " PID "
                     + self.headdict[tr.name + "PID"],
@@ -580,7 +569,8 @@ class CSV_log:
         meanfreq = 1.0 / (traces[0].time[1] - traces[0].time[0])
         ax4 = plt.subplot(gs1[12, -1])
         t = (
-            "PID-Analyzer " + __version__
+            "PID-Analyzer "
+            + __version__
             + " | Betaflight: Version "
             + self.headdict["version"]
             + " | Craftname: "
@@ -634,13 +624,6 @@ class CSV_log:
             + "_response.png"
         )
         return fig
-
-    def __analyze(self):
-        analyzed = []
-        for t in self.traces:
-            logging.info(t["name"] + "...   ")
-            analyzed.append(analyzer.Trace(t))
-        return analyzed
 
     def readcsv(self, fpath):
         logging.info("Reading: Log " + str(self.headdict["logNum"]))
@@ -747,7 +730,7 @@ class CSV_log:
         return datdic
 
     def find_traces(self, dat):
-        time = self.data["time_us"]
+        time = dat["time_us"]
         throttle = dat["throttle"]
 
         throt = (
@@ -785,4 +768,3 @@ class CSV_log:
             dic.update({"throttle": throt})
 
         return traces
-

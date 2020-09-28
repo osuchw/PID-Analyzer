@@ -1,30 +1,17 @@
 import logging
 import os
 import subprocess
-import matplotlib.pyplot as plt
-
-from . import plotter
 
 
 LOG_MIN_BYTES = 500000
 
 
-
 class BB_log:
-    def __init__(self, log_file_path, name, blackbox_decode, show, noise_bounds):
+    def __init__(self, log_file_path, name, blackbox_decode):
         self.blackbox_decode_bin_path = blackbox_decode
         self.tmp_dir = os.path.join(os.path.dirname(log_file_path), name)
         if not os.path.isdir(self.tmp_dir):
             os.makedirs(self.tmp_dir)
-        self.name = name
-        self.show = show
-        self.noise_bounds = noise_bounds
-
-        self.loglist = self.decode(log_file_path)
-        self.heads = self.beheader(self.loglist)
-        self.figs = self._csv_iter(self.heads)
-
-        self.deletejunk(self.loglist)
 
     def deletejunk(self, loglist):
         for l in loglist:
@@ -35,18 +22,6 @@ class BB_log:
             except:
                 logging.warning("No .event file of " + l + " found.")
         return
-
-    def _csv_iter(self, heads):
-        figs = []
-        for h in heads:
-            analysed = plotter.CSV_log(
-                h["tempFile"][:-3] + "01.csv", self.name, h, self.noise_bounds
-            )
-            # figs.append([analysed.fig_resp,analysed.fig_noise])
-            if self.show != "Y":
-                plt.cla()
-                plt.clf()
-        return figs
 
     def beheader(self, loglist):
         heads = []
@@ -192,4 +167,3 @@ class BB_log:
                 )
                 os.remove(bbl_session)
         return loglist
-
