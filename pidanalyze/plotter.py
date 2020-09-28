@@ -9,22 +9,24 @@ import matplotlib.colors as colors
 from . import __version__
 
 
+def check_lims_list(lims):
+    if type(lims) is list:
+        l = np.array(lims)
+        if np.shape(l) == (4, 2):
+            ll = l[:, 1] - l[:, 0]
+            if np.sum(np.abs((ll - np.abs(ll)))) == 0:
+                return True
+    else:
+        logging.info("noise_bounds is no valid list")
+        return False
+
+
 class CSV_log:
     def __init__(self, fpath, name, headdict, noise_bounds):
         self.file = fpath
         self.name = name
         self.headdict = headdict
 
-    def check_lims_list(self, lims):
-        if type(lims) is list:
-            l = np.array(lims)
-            if str(np.shape(l)) == "(4L, 2L)":
-                ll = l[:, 1] - l[:, 0]
-                if np.sum(np.abs((ll - np.abs(ll)))) == 0:
-                    return True
-        else:
-            logging.info("noise_bounds is no valid list")
-            return False
 
     def plot_all_noise(self, traces, lims):  # style='fancy' gives 2d hist for response
         textsize = 7
@@ -95,7 +97,7 @@ class CSV_log:
         )
         meanspec_max = np.max(meanspec * mask[:-1])
 
-        if not self.check_lims_list(lims):
+        if not check_lims_list(lims):
             lims = np.array(
                 [
                     [1, max_noise_gyro],
