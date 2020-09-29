@@ -17,18 +17,18 @@ def check_lims_list(lims):
             if np.sum(np.abs((ll - np.abs(ll)))) == 0:
                 return True
     else:
-        logging.info("noise_bounds is no valid list")
+        logging.warning("noise_bounds is no valid list")
         return False
 
 
 class CSV_log:
-    def __init__(self, fpath, name, headdict, noise_bounds):
-        self.file = fpath
-        self.name = name
+    def __init__(self, fpath, headdict):
+        self.fpath = fpath
         self.headdict = headdict
 
 
-    def plot_all_noise(self, traces, lims):  # style='fancy' gives 2d hist for response
+    def plot_all_noise(self, traces, lims):
+        # style='fancy' gives 2d hist for response
         textsize = 7
         rcParams.update({"font.size": 9})
 
@@ -37,7 +37,7 @@ class CSV_log:
             "Noise plot: Log number: "
             + self.headdict["logNum"]
             + "          "
-            + self.file,
+            + self.fpath,
             figsize=(16, 8),
         )
         ### gridspec devides window into 25 horizontal, 31 vertical fields
@@ -416,14 +416,6 @@ class CSV_log:
         ax5l.text(0, 0, filt_settings_l, ha="left", fontsize=textsize)
         ax5r.text(0, 0, filt_settings_r, ha="left", fontsize=textsize)
 
-        logging.info("Saving as image...")
-        plt.savefig(
-            self.file[:-13]
-            + self.name
-            + "_"
-            + str(self.headdict["logNum"])
-            + "_noise.png"
-        )
         return fig
 
     def plot_all_resp(self, traces, threshold, style="ra"):
@@ -435,7 +427,7 @@ class CSV_log:
             "Response plot: Log number: "
             + self.headdict["logNum"]
             + "          "
-            + self.file,
+            + self.fpath,
             figsize=(16, 8),
         )
         ### gridspec devides window into 24 horizontal, 3*10 vertical fields
@@ -617,14 +609,6 @@ class CSV_log:
             fontsize=textsize,
         )
         ax4.axis("off")
-        logging.info("Saving as image...")
-        plt.savefig(
-            self.file[:-13]
-            + self.name
-            + "_"
-            + str(self.headdict["logNum"])
-            + "_response.png"
-        )
         return fig
 
     def readcsv(self, fpath):

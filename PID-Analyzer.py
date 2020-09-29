@@ -25,7 +25,7 @@ def run_analysis(log_file_path, plot_name, blackbox_decode, show, noise_bounds):
     figs = []
     for head in heads:
         fpath = head["tempFile"][:-3] + "01.csv"
-        log = plotter.CSV_log(fpath, plot_name, head, noise_bounds)
+        log = plotter.CSV_log(fpath, head)
 
         logging.info("Processing:")
         data = log.readcsv(fpath)
@@ -38,8 +38,26 @@ def run_analysis(log_file_path, plot_name, blackbox_decode, show, noise_bounds):
         roll, pitch, yaw = analyzed
 
         fig_resp = log.plot_all_resp([roll, pitch, yaw], analyzer.Trace.threshold)
-        fig_noise = log.plot_all_noise([roll, pitch, yaw], noise_bounds)
+        logging.info("Saving response plot as image...")
+        fig_resp.savefig(
+            fpath[:-13]
+            + plot_name
+            + "_"
+            + str(head["logNum"])
+            + "_response.png"
+        )
 
+        fig_noise = log.plot_all_noise([roll, pitch, yaw], noise_bounds)
+        logging.info("Saving noise plot as image...")
+        fig_noise.savefig(
+            fpath[:-13]
+            + plot_name
+            + "_"
+            + str(head["logNum"])
+            + "_noise.png"
+        )
+
+        breakpoint()
         figs.append([fig_resp, fig_noise])
         if show != "Y":
             plt.cla()
