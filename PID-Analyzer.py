@@ -4,7 +4,6 @@ import logging
 import os
 import time
 import matplotlib.pyplot as plt
-from six.moves import input as sinput
 
 from pidanalyze import __version__, loader, plotter, analyzer
 
@@ -25,19 +24,19 @@ def run_analysis(log_file_path, plot_name, blackbox_decode, show, noise_bounds):
     figs = []
     for head in heads:
         fpath = head["tempFile"][:-3] + "01.csv"
-        log = plotter.CSV_log(fpath, head)
+
+        logging.info("Reading: Log %s", head["logNum"])
+        data = loader.readcsv(fpath)
+        traces = loader.find_traces(data, head)
 
         logging.info("Processing:")
-        data = log.readcsv(fpath)
-        traces = log.find_traces(data)
-
         analyzed = []
         for trace in traces:
             logging.info(trace["name"] + "...   ")
             analyzed.append(analyzer.Trace(trace))
         roll, pitch, yaw = analyzed
 
-        fig_resp = log.plot_all_resp([roll, pitch, yaw], analyzer.Trace.threshold)
+        fig_resp = plotter.plot_all_resp(fpath, head, [roll, pitch, yaw], analyzer.Trace.threshold)
         logging.info("Saving response plot as image...")
         fig_resp.savefig(
             fpath[:-13]
@@ -47,7 +46,7 @@ def run_analysis(log_file_path, plot_name, blackbox_decode, show, noise_bounds):
             + "_response.png"
         )
 
-        fig_noise = log.plot_all_noise([roll, pitch, yaw], noise_bounds)
+        fig_noise = plotter.plot_all_noise(fpath, head, [roll, pitch, yaw], noise_bounds)
         logging.info("Saving noise plot as image...")
         fig_noise.savefig(
             fpath[:-13]
@@ -57,7 +56,6 @@ def run_analysis(log_file_path, plot_name, blackbox_decode, show, noise_bounds):
             + "_noise.png"
         )
 
-        breakpoint()
         figs.append([fig_resp, fig_noise])
         if show != "Y":
             plt.cla()
@@ -150,7 +148,7 @@ if __name__ == "__main__":
 
             try:
                 time.sleep(0.1)
-                raw_path = sinput("Blackbox log file path (type or drop here): ")
+                raw_path = input("Blackbox log file path (type or drop here): ")
 
                 if raw_path == "close":
                     logging.info("Goodbye!")
@@ -159,10 +157,10 @@ if __name__ == "__main__":
                 raw_paths = (
                     strip_quotes(raw_path).replace("''", '""').split('""')
                 )  # seperate multiple paths
-                name = sinput("Optional plot name:") or args.name
-                showplt = sinput("Show plot window when done? [Y]/N") or args.show
+                name = input("Optional plot name:") or args.name
+                showplt = input("Show plot window when done? [Y]/N") or args.show
                 noise_bounds = (
-                    sinput(
+                    input(
                         'Bounds on noise plot: [default/last] | copy and edit | "auto"\nCurrent: '
                         + str(args.noise_bounds)
                         + "\n"
