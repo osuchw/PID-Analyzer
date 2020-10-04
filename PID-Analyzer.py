@@ -16,10 +16,13 @@ from pidanalyze import __version__, loader, plotter, analyzer
 
 
 def run_analysis(log_file_path, plot_name, blackbox_decode, show, noise_bounds):
-    bb_log = loader.BB_log(log_file_path, plot_name, blackbox_decode)
 
-    loglist = bb_log.decode(log_file_path)
-    heads = bb_log.beheader(loglist)
+    tmp_dir = os.path.join(os.path.dirname(log_file_path), plot_name)
+    if not os.path.isdir(tmp_dir):
+        os.makedirs(tmp_dir)
+
+    loglist = loader.decode(log_file_path, tmp_dir, blackbox_decode)
+    heads = loader.beheader(loglist, tmp_dir)
 
     figs = []
     for head in heads:
@@ -53,7 +56,7 @@ def run_analysis(log_file_path, plot_name, blackbox_decode, show, noise_bounds):
             plt.cla()
             plt.clf()
 
-    bb_log.deletejunk(loglist)
+    loader.deletejunk(loglist)
     logging.info("Analysis complete, showing plot. (Close plot to exit.)")
 
 
