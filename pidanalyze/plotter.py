@@ -20,17 +20,14 @@ def check_lims_list(lims):
         return False
 
 
-def plot_all_noise(fpath, headdict, traces, lims):
+def plot_all_noise(fpath, head, traces, lims):
     # style='fancy' gives 2d hist for response
     textsize = 7
     rcParams.update({"font.size": 9})
 
     logging.info("Making noise plot...")
     fig = plt.figure(
-        "Noise plot: Log number: "
-        + headdict["logNum"]
-        + "          "
-        + fpath,
+        f"Noise plot: Log number: {head['logNum']}      {fpath}",
         figsize=(16, 8),
     )
     ### gridspec devides window into 25 horizontal, 31 vertical fields
@@ -131,7 +128,7 @@ def plot_all_noise(fpath, headdict, traces, lims):
         if len(axes_gyro):
             axes_gyro[0].get_shared_x_axes().join(axes_gyro[0], ax0)
         axes_gyro.append(ax0)
-        ax0.set_title("gyro " + tr.name, y=0.88, color="w")
+        ax0.set_title(f"gyro {tr.name}", y=0.88, color="w")
         pc0 = plt.pcolormesh(
             tr.noise_gyro["throt_axis"],
             tr.noise_gyro["freq_axis"],
@@ -155,7 +152,7 @@ def plot_all_noise(fpath, headdict, traces, lims):
             ax0.text(
                 0.5,
                 0.5,
-                "no gyro[" + str(i) + "] trace found!\n",
+                f"no gyro[{i}] trace found!\n",
                 horizontalalignment="center",
                 verticalalignment="center",
                 transform=ax0.transAxes,
@@ -167,7 +164,7 @@ def plot_all_noise(fpath, headdict, traces, lims):
         if len(axes_debug):
             axes_debug[0].get_shared_x_axes().join(axes_debug[0], ax1)
         axes_debug.append(ax1)
-        ax1.set_title("debug " + tr.name, y=0.88, color="w")
+        ax1.set_title(f"debug {tr.name}", y=0.88, color="w")
         pc1 = plt.pcolormesh(
             tr.noise_debug["throt_axis"],
             tr.noise_debug["freq_axis"],
@@ -191,7 +188,7 @@ def plot_all_noise(fpath, headdict, traces, lims):
             ax1.text(
                 0.5,
                 0.5,
-                "no debug[" + str(i) + "] trace found!\n"
+                f"no debug[{i}] trace found!\n"
                 "To get transmission of\n"
                 "- all filters: set debug_mode = NOTCH\n"
                 "- LPF only: set debug_mode = GYRO",
@@ -207,7 +204,7 @@ def plot_all_noise(fpath, headdict, traces, lims):
             if len(axes_d):
                 axes_d[0].get_shared_x_axes().join(axes_d[0], ax2)
             axes_d.append(ax2)
-            ax2.set_title("D-term " + tr.name, y=0.88, color="w")
+            ax2.set_title(f"D-term {tr.name}", y=0.88, color="w")
             pc2 = plt.pcolormesh(
                 tr.noise_d["throt_axis"],
                 tr.noise_d["freq_axis"],
@@ -228,7 +225,7 @@ def plot_all_noise(fpath, headdict, traces, lims):
                 ax2.text(
                     0.5,
                     0.5,
-                    "no D[" + str(i) + "] trace found!\n",
+                    f"no D[{i}] trace found!\n",
                     horizontalalignment="center",
                     verticalalignment="center",
                     transform=ax2.transAxes,
@@ -250,7 +247,7 @@ def plot_all_noise(fpath, headdict, traces, lims):
             )
             axes_d[0].get_shared_x_axes().join(axes_d[0], ax21)
             ax21.vlines(
-                headdict["tpa_percent"],
+                head["tpa_percent"],
                 0.0,
                 100.0,
                 label="tpa",
@@ -273,7 +270,7 @@ def plot_all_noise(fpath, headdict, traces, lims):
                 alpha=0.2,
             )
             ax22.hlines(
-                headdict["tpa_percent"],
+                head["tpa_percent"],
                 tr.time[0],
                 tr.time[-1],
                 label="tpa",
@@ -297,17 +294,17 @@ def plot_all_noise(fpath, headdict, traces, lims):
             tr.noise_gyro["freq_axis"][:-1],
             0,
             meanspec[i],
-            label=tr.name + " gyro noise",
+            label=f"{tr.name} gyro noise",
             alpha=0.2,
         )
         ax3.set_ylim(lims[3])
-        ax3.set_ylabel(tr.name + " gyro noise a.u.")
+        ax3.set_ylabel(f"{tr.name} gyro noise a.u.")
         ax3.grid()
         ax3r = plt.twinx(ax3)
         ax3r.plot(
             tr.noise_gyro["freq_axis"][:-1],
             tr.filter_trans * 100.0,
-            label=tr.name + " filter transmission",
+            label=f"{tr.name} filter transmission",
         )
         ax3r.set_ylabel("transmission in %")
         ax3r.set_ylim([0.0, 100.0])
@@ -325,40 +322,19 @@ def plot_all_noise(fpath, headdict, traces, lims):
     meanfreq = 1.0 / (traces[0].time[1] - traces[0].time[0])
     ax4 = plt.subplot(gs1[12, -1])
     t = (
-        "PID-Analyzer "
-        + __version__
-        + "| Betaflight: Version "
-        + headdict["version"]
-        + " | Craftname: "
-        + headdict["craftName"]
-        + " | meanFreq: "
-        + str(int(meanfreq))
-        + " | rcRate/Expo: "
-        + headdict["rcRate"]
-        + "/"
-        + headdict["rcExpo"]
-        + "\nrcYawRate/Expo: "
-        + headdict["rcYawRate"]
-        + "/"
-        + headdict["rcYawExpo"]
-        + " | deadBand: "
-        + headdict["deadBand"]
-        + " | yawDeadBand: "
-        + headdict["yawDeadBand"]
-        + " | Throttle min/tpa/max: "
-        + headdict["minThrottle"]
-        + "/"
-        + headdict["tpa_breakpoint"]
-        + "/"
-        + headdict["maxThrottle"]
-        + " | dynThrPID: "
-        + headdict["dynThrottle"]
-        + "| D-TermSP: "
-        + headdict["dTermSetPoint"]
-        + "| vbatComp: "
-        + headdict["vbatComp"]
-        + " | debug "
-        + headdict["debug_mode"]
+        f"PID-Analyzer {__version__}"
+        f"| Betaflight: Version {head['version']}"
+        f" | Craftname: {head['craftName']}"
+        f" | meanFreq: {int(meanfreq)}"
+        f" | rcRate/Expo: {head['rcRate']}/{head['rcExpo']}\n"
+        f"rcYawRate/Expo: {head['rcYawRate']}/{head['rcYawExpo']}"
+        f" | deadBand: {head['deadBand']}"
+        f" | yawDeadBand: {head['yawDeadBand']}"
+        f" | Throttle min/tpa/max: {head['minThrottle']}/{head['tpa_breakpoint']}/{head['maxThrottle']}"
+        f" | dynThrPID: {head['dynThrottle']}"
+        f"| D-TermSP: {head['dTermSetPoint']}"
+        f"| vbatComp: {head['vbatComp']}"
+        f" | debug {head['debug_mode']}"
     )
 
     ax4.text(
@@ -379,31 +355,14 @@ def plot_all_noise(fpath, headdict, traces, lims):
     ax5l.axis("off")
     ax5r.axis("off")
     filt_settings_l = (
-        "G lpf type: "
-        + headdict["gyro_lpf"]
-        + " at "
-        + headdict["gyro_lowpass_hz"]
-        + "\n"
-        + "G notch at: "
-        + headdict["gyro_notch_hz"]
-        + " cut "
-        + headdict["gyro_notch_cutoff"]
-        + "\n"
-        "gyro lpf 2: " + headdict["gyro_lowpass_type"]
+        f"G lpf type: {head['gyro_lpf']} at {head['gyro_lowpass_hz']}\n"
+        f"G notch at: {head['gyro_notch_hz']} cut {head['gyro_notch_cutoff']}\n"
+        f"gyro lpf 2: {head['gyro_lowpass_type']}"
     )
     filt_settings_r = (
-        "| D lpf type: "
-        + headdict["dterm_filter_type"]
-        + " at "
-        + headdict["dterm_lpf_hz"]
-        + "\n"
-        + "| D notch at: "
-        + headdict["dterm_notch_hz"]
-        + " cut "
-        + headdict["dterm_notch_cutoff"]
-        + "\n"
-        + "| Yaw lpf at: "
-        + headdict["yaw_lpf_hz"]
+        f"| D lpf type: {head['dterm_filter_type']} at {head['dterm_lpf_hz']}\n"
+        f"| D notch at: {head['dterm_notch_hz']} cut {head['dterm_notch_cutoff']}\n"
+        f"| Yaw lpf at: {head['yaw_lpf_hz']}"
     )
 
     ax5l.text(0, 0, filt_settings_l, ha="left", fontsize=textsize)
@@ -411,16 +370,13 @@ def plot_all_noise(fpath, headdict, traces, lims):
 
     return fig
 
-def plot_all_resp(fpath, headdict, traces, threshold, style="ra"):
+def plot_all_resp(fpath, head, traces, threshold, style="ra"):
     textsize = 7
     titelsize = 10
     rcParams.update({"font.size": 9})
     logging.info("Making PID plot...")
     fig = plt.figure(
-        "Response plot: Log number: "
-        + headdict["logNum"]
-        + "          "
-        + fpath,
+        f"Response plot: Log number: {head['logNum']}       {fpath}",
         figsize=(16, 8),
     )
     ### gridspec devides window into 24 horizontal, 3*10 vertical fields
@@ -438,8 +394,8 @@ def plot_all_resp(fpath, headdict, traces, threshold, style="ra"):
     for i, tr in enumerate(traces):
         ax0 = plt.subplot(gs1[0:6, i * 10 : i * 10 + 9])
         plt.title(tr.name)
-        plt.plot(tr.time, tr.gyro, label=tr.name + " gyro")
-        plt.plot(tr.time, tr.input, label=tr.name + " loop input")
+        plt.plot(tr.time, tr.gyro, label=f"{tr.name} gyro")
+        plt.plot(tr.time, tr.input, label=f"{tr.name} loop input")
         plt.ylabel("degrees/second")
         ax0.get_yaxis().set_label_coords(-0.1, 0.5)
         plt.grid()
@@ -450,7 +406,7 @@ def plot_all_resp(fpath, headdict, traces, threshold, style="ra"):
 
         ax1 = plt.subplot(gs1[6:8, i * 10 : i * 10 + 9], sharex=ax0)
         plt.hlines(
-            headdict["tpa_percent"],
+            head["tpa_percent"],
             tr.time[0],
             tr.time[-1],
             label="tpa",
@@ -483,7 +439,7 @@ def plot_all_resp(fpath, headdict, traces, threshold, style="ra"):
         else:
             ###response vs throttle plot. more useful.
             ax2 = plt.subplot(gs1[9:16, i * 10 : i * 10 + 9])
-            plt.title(tr.name + " response", y=0.88, color="w")
+            plt.title(f"{tr.name} response", y=0.88, color="w")
             plt.pcolormesh(
                 tr.thr_response["throt_scale"],
                 tr.time_resp,
@@ -511,13 +467,7 @@ def plot_all_resp(fpath, headdict, traces, threshold, style="ra"):
         plt.plot(
             tr.time_resp,
             tr.resp_low[0],
-            label=tr.name
-            + " step response "
-            + "(<"
-            + str(int(threshold))
-            + ") "
-            + " PID "
-            + headdict[tr.name + "PID"],
+            label=f"{tr.name} step response (<{int(threshold)})  PID {head[tr.name + 'PID']}",
         )
 
         if tr.high_mask.sum() > 0:
@@ -535,13 +485,7 @@ def plot_all_resp(fpath, headdict, traces, threshold, style="ra"):
             plt.plot(
                 tr.time_resp,
                 tr.resp_high[0],
-                label=tr.name
-                + " step response "
-                + "(>"
-                + str(int(threshold))
-                + ") "
-                + " PID "
-                + headdict[tr.name + "PID"],
+                label=f"{tr.name} step response (>{int(threshold)})  PID {head[tr.name + 'PID']}",
             )
         plt.xlim([-0.001, 0.501])
 
@@ -556,38 +500,18 @@ def plot_all_resp(fpath, headdict, traces, threshold, style="ra"):
     meanfreq = 1.0 / (traces[0].time[1] - traces[0].time[0])
     ax4 = plt.subplot(gs1[12, -1])
     t = (
-        "PID-Analyzer "
-        + __version__
-        + " | Betaflight: Version "
-        + headdict["version"]
-        + " | Craftname: "
-        + headdict["craftName"]
-        + " | meanFreq: "
-        + str(int(meanfreq))
-        + " | rcRate/Expo: "
-        + headdict["rcRate"]
-        + "/"
-        + headdict["rcExpo"]
-        + "\nrcYawRate/Expo: "
-        + headdict["rcYawRate"]
-        + "/"
-        + headdict["rcYawExpo"]
-        + " | deadBand: "
-        + headdict["deadBand"]
-        + " | yawDeadBand: "
-        + headdict["yawDeadBand"]
-        + " | Throttle min/tpa/max: "
-        + headdict["minThrottle"]
-        + "/"
-        + headdict["tpa_breakpoint"]
-        + "/"
-        + headdict["maxThrottle"]
-        + " | dynThrPID: "
-        + headdict["dynThrottle"]
-        + "| D-TermSP: "
-        + headdict["dTermSetPoint"]
-        + "| vbatComp: "
-        + headdict["vbatComp"]
+        f"PID-Analyzer {__version__}"
+        f" | Betaflight: Version {head['version']}"
+        f" | Craftname: {head['craftName']}"
+        f" | meanFreq: {int(meanfreq)}"
+        f" | rcRate/Expo: {head['rcRate']}/{head['rcExpo']}\n"
+        f"rcYawRate/Expo: {head['rcYawRate']}/{head['rcYawExpo']}"
+        f" | deadBand: {head['deadBand']}"
+        f" | yawDeadBand: {head['yawDeadBand']}"
+        f" | Throttle min/tpa/max: {head['minThrottle']}/{head['tpa_breakpoint']}/{head['maxThrottle']}"
+        f" | dynThrPID: {head['dynThrottle']}"
+        f"| D-TermSP: {head['dTermSetPoint']}"
+        f"| vbatComp: {head['vbatComp']}"
     )
 
     plt.text(

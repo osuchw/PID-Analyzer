@@ -36,25 +36,17 @@ def run_analysis(log_file_path, plot_name, blackbox_decode, show, noise_bounds):
             analyzed.append(analyzer.Trace(trace))
         roll, pitch, yaw = analyzed
 
-        fig_resp = plotter.plot_all_resp(fpath, head, [roll, pitch, yaw], analyzer.Trace.threshold)
+        fig_resp = plotter.plot_all_resp(
+            fpath, head, [roll, pitch, yaw], analyzer.Trace.threshold
+        )
         logging.info("Saving response plot as image...")
-        fig_resp.savefig(
-            fpath[:-13]
-            + plot_name
-            + "_"
-            + str(head["logNum"])
-            + "_response.png"
-        )
+        fig_resp.savefig(f"{fpath[:-13]}.{plot_name}_{head['logNum']}_response.png")
 
-        fig_noise = plotter.plot_all_noise(fpath, head, [roll, pitch, yaw], noise_bounds)
-        logging.info("Saving noise plot as image...")
-        fig_noise.savefig(
-            fpath[:-13]
-            + plot_name
-            + "_"
-            + str(head["logNum"])
-            + "_noise.png"
+        fig_noise = plotter.plot_all_noise(
+            fpath, head, [roll, pitch, yaw], noise_bounds
         )
+        logging.info("Saving noise plot as image...")
+        fig_noise.savefig(f"{fpath[:-13]}.{plot_name}_{head['logNum']}_noise.png")
 
         figs.append([fig_resp, fig_noise])
         if show != "Y":
@@ -124,7 +116,7 @@ if __name__ == "__main__":
         )
     logging.info("Decoding with %r" % blackbox_decode_path)
 
-    logging.info("PID Analyzer: " + __version__)
+    logging.info("PID Analyzer: %s", __version__)
     logging.info("Hello Pilot!")
 
     if args.log:
