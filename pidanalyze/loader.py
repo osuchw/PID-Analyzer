@@ -258,23 +258,21 @@ def find_traces(data, head):
 
     traces = []
     for i, name in enumerate(["roll", "pitch", "yaw"]):
-        data["name"] = name
-        data["time"] = time
-        data["throttle"] = throttle
-        data["p_err"] = data[f"PID loop in{i}"]
-        data["rcinput"] = data[f"rcCommand{i}"]
-        data["gyro"] = data[f"gyroData{i}"]
-        data["PIDsum"] = data[f"PID sum{i}"]
-        data["d_err"] = data[f"d_err{i}"]
-        data["debug"] = data[f"debug{i}"]
+        trace_data = {"name": name, "time": time, "throttle": throttle}
+        trace_data["p_err"] = data[f"PID loop in{i}"]
+        trace_data["rcinput"] = data[f"rcCommand{i}"]
+        trace_data["gyro"] = data[f"gyroData{i}"]
+        trace_data["PIDsum"] = data[f"PID sum{i}"]
+        trace_data["d_err"] = data[f"d_err{i}"]
+        trace_data["debug"] = data[f"debug{i}"]
         if "KISS" in head["fwType"]:
-            data["P"] = 1.0
+            trace_data["P"] = 1.0
             head["tpa_percent"] = 0.0
         elif "Raceflight" in head["fwType"]:
-            data["P"] = 1.0
+            trace_data["P"] = 1.0
             head["tpa_percent"] = 0.0
         else:
-            data["P"] = float((head[data["name"] + "PID"]).split(",")[0])
+            trace_data["P"] = float((head[trace_data["name"] + "PID"]).split(",")[0])
             head["tpa_percent"] = (float(head["tpa_breakpoint"]) - 1000.0) / 10.0
-        traces.append(data)
+        traces.append(trace_data)
     return traces

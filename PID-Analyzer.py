@@ -34,9 +34,9 @@ def run_analysis(log_file_path, plot_name, blackbox_decode, show, noise_bounds):
 
         logging.info("Processing:")
         analyzed = []
-        for trace in traces:
-            logging.info(trace["name"] + "...   ")
-            analyzed.append(analyzer.Trace(trace))
+        for trace_data in traces:
+            logging.info(trace_data["name"] + "...   ")
+            analyzed.append(analyzer.Trace(trace_data))
         roll, pitch, yaw = analyzed
 
         fig_resp = plotter.plot_all_resp(
